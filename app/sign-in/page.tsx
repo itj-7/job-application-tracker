@@ -45,7 +45,7 @@ function SignIn() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-white p-4]">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-white p-4">
       <Card className="w-full max-w-md border-gray-200 shadow-lg">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-black">
@@ -96,6 +96,7 @@ function SignIn() {
             <Button
               className="w-full bg-primary hover:bg-primary/90"
               type="submit"
+              disabled={loading}
             >
               {loading ? "Signin in" : "Sign In"}
             </Button>
