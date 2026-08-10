@@ -38,8 +38,13 @@ function CreateJobApplicationDialogue({
 }: CreateJobApplicationDialogueProps) {
   const [open, setOpen] = useState<boolean>(false);
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setError(null);
     try {
       const result = await createJobApplication({
         ...formData,
@@ -54,10 +59,13 @@ function CreateJobApplicationDialogue({
         setFormData(INITIAL_FORM_DATA);
         setOpen(false);
       } else {
-        console.error("failed to create job", result.error);
+        setError(result.error);
       }
     } catch (err) {
       console.error(err);
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
   return (
@@ -172,6 +180,7 @@ function CreateJobApplicationDialogue({
               ></Textarea>
             </div>
           </div>
+          {error && <p>{error}</p>}
           <DialogFooter>
             <Button
               type="button"
@@ -180,7 +189,9 @@ function CreateJobApplicationDialogue({
             >
               Cancel
             </Button>
-            <Button type="submit">Add Application</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              Add Application
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
