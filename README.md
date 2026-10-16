@@ -1,36 +1,119 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Job Application Tracker
+
+A Kanban-style web app for tracking your job search. Sign up, get a ready-made "Job Hunt" board, and drag applications between stages as they move from wish list to offer.
+
+## Features
+
+- **Email and password authentication** with [Better Auth](https://www.better-auth.com/), including sign-up, sign-in, and sign-out
+- **Automatic board setup**: a "Job Hunt" board with five columns (Wish List, Applied, Interviewed, Offer, Rejected) is created for every new user
+- **Drag and drop** applications between columns, powered by dnd-kit
+- **Rich application cards** with company, position, location, salary, job URL, applied date, tags, description, and notes
+- **Create, edit, and delete** applications, and delete whole columns
+- **Route protection**: signed-in users are redirected away from the sign-in and sign-up pages, and the dashboard redirects visitors who are not signed in
+- **Landing page** with a feature overview and screenshot tabs
+- **Seed script** to fill a board with sample applications
+
+## Tech Stack
+
+| Area | Technology |
+| --- | --- |
+| Framework | Next.js 16 (App Router), React 19, TypeScript |
+| Database | MongoDB with Mongoose |
+| Auth | Better Auth (MongoDB adapter) |
+| Drag and drop | dnd-kit (`core`, `sortable`, `utilities`) |
+| UI | Tailwind CSS 4, shadcn/ui, Lucide icons |
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20 or newer
+- A MongoDB database (local, or a free [MongoDB Atlas](https://www.mongodb.com/atlas) cluster)
+
+### Installation
+
+```bash
+npm install
+```
+
+### Environment variables
+
+Create a `.env.local` file in the project root:
+
+```env
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/<database>
+NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_SECRET=replace-with-a-long-random-string
+```
+
+| Variable | Purpose |
+| --- | --- |
+| `MONGODB_URI` | MongoDB connection string. Used by Mongoose and by Better Auth. |
+| `NEXT_PUBLIC_BETTER_AUTH_URL` | Base URL of the app, used by the Better Auth client. |
+| `BETTER_AUTH_SECRET` | Secret Better Auth uses to sign sessions. Required in production. Generate one with `openssl rand -base64 32`. |
+
+### Run the app
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000), create an account, and your board will be waiting on the dashboard.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the development server |
+| `npm run build` | Create a production build |
+| `npm run start` | Run the production build |
+| `npm run lint` | Lint the code with ESLint |
+| `npm run seed:jobs` | Fill a user's board with sample applications (see below) |
 
-## Learn More
+## Seeding Sample Data
 
-To learn more about Next.js, take a look at the following resources:
+`scripts/seed.ts` adds 15 sample applications spread across the five columns, which is handy for demos and screenshots.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Sign up in the app and copy your user ID from the `user` collection in MongoDB.
+2. Open `scripts/seed.ts` and set the `USER_ID` constant at the top to that ID.
+3. Run:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm run seed:jobs
+   ```
 
-## Deploy on Vercel
+The script reads `.env.local` for `MONGODB_URI`. It replaces any existing applications for that user, so don't run it on a board you want to keep.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/
+  api/auth/[...all]/   Better Auth route handler
+  dashboard/           Protected Kanban board page
+  sign-in/, sign-up/   Authentication pages
+  page.tsx             Landing page
+components/
+  kanbanBoard.tsx      Board, columns, and drag-and-drop logic
+  JobApplicationCard.tsx
+  CreateJobApplicationDialogue.tsx
+  ui/                  shadcn/ui primitives
+lib/
+  actions/             Server actions for applications and columns
+  auth/                Better Auth server and client setup
+  hooks/useBoard.ts    Board state and move handling
+  models/              Mongoose models (Board, Column, JobApplication)
+  init-user-board.ts   Default board and columns for new users
+  db.ts                Cached MongoDB connection
+proxy.ts               Redirects signed-in users away from auth pages
+scripts/seed.ts        Sample data seeder
+```
+
+## How It Works
+
+- Each user owns one **Board**, which has ordered **Columns**, which hold **JobApplications**. Every document stores the owner's `userId`.
+- When a user signs up, a Better Auth database hook calls `initializeUserBoard` to create the board and its default columns.
+- Dragging a card calls `useBoard.moveJob`, which updates the application's column and position through a server action.
+
+## Deployment
+
+The app deploys well on [Vercel](https://vercel.com). Add the environment variables above in the project settings, and set `NEXT_PUBLIC_BETTER_AUTH_URL` to your production URL. Make sure your MongoDB provider allows connections from your host (for Atlas, update the network access list).
