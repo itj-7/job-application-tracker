@@ -87,25 +87,54 @@ The script reads `.env.local` for `MONGODB_URI`. It replaces any existing applic
 ## Project Structure
 
 ```
-app/
-  api/auth/[...all]/   Better Auth route handler
-  dashboard/           Protected Kanban board page
-  sign-in/, sign-up/   Authentication pages
-  page.tsx             Landing page
-components/
-  kanbanBoard.tsx      Board, columns, and drag-and-drop logic
-  JobApplicationCard.tsx
-  CreateJobApplicationDialogue.tsx
-  ui/                  shadcn/ui primitives
-lib/
-  actions/             Server actions for applications and columns
-  auth/                Better Auth server and client setup
-  hooks/useBoard.ts    Board state and move handling
-  models/              Mongoose models (Board, Column, JobApplication)
-  init-user-board.ts   Default board and columns for new users
-  db.ts                Cached MongoDB connection
-proxy.ts               Redirects signed-in users away from auth pages
-scripts/seed.ts        Sample data seeder
+job-application-tracker/
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...all]/
+│   │           └── route.ts          # Better Auth route handler
+│   ├── dashboard/
+│   │   └── page.tsx                  # Protected Kanban board page
+│   ├── sign-in/
+│   │   └── page.tsx
+│   ├── sign-up/
+│   │   └── page.tsx
+│   ├── layout.tsx
+│   ├── page.tsx                      # Landing page
+│   └── globals.css
+├── components/
+│   ├── ui/                           # shadcn/ui primitives
+│   ├── kanbanBoard.tsx               # Board, columns, drag and drop
+│   ├── JobApplicationCard.tsx
+│   ├── CreateJobApplicationDialogue.tsx
+│   ├── ImageTabs.tsx
+│   ├── Navbar.tsx
+│   └── signOutButton.tsx
+├── lib/
+│   ├── actions/
+│   │   └── job-applications.ts       # Server actions
+│   ├── auth/
+│   │   ├── auth.ts                   # Better Auth server setup
+│   │   └── auth-client.ts            # Better Auth client
+│   ├── hooks/
+│   │   └── useBoard.ts               # Board state and move handling
+│   ├── models/                       # Mongoose models
+│   │   ├── board.ts
+│   │   ├── column.ts
+│   │   ├── jobApplication.ts
+│   │   ├── models.types.ts
+│   │   └── index.ts
+│   ├── db.ts                         # Cached MongoDB connection
+│   ├── init-user-board.ts            # Default board for new users
+│   └── utils.ts
+├── public/
+│   └── hero-images/                  # Landing page screenshots
+├── scripts/
+│   └── seed.ts                       # Sample data seeder
+├── proxy.ts                          # Redirects signed-in users from auth pages
+├── next.config.ts
+├── package.json
+└── tsconfig.json
 ```
 
 ## How It Works
